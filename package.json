@@ -1,0 +1,62 @@
+{
+  "name": "@cytoscape-web/psicquic",
+  "description": "Search PSICQUIC-compliant molecular interaction databases and import the results as networks",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "//cyweb": [
+    "This app's identity, written ONCE. The Module Federation container name,",
+    "the CyApp.id, the dev server port and the dev install manifest all read",
+    "from here (see vite.config.ts and virtual:cyweb-app-meta)."
+  ],
+  "cyweb": {
+    "id": "psicquic",
+    "displayName": "PSICQUIC",
+    "port": 5557
+  },
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "verify": "cyweb-app verify",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json"
+  },
+  "//peerDependencies": [
+    "Provided by the HOST as Module Federation singletons — the share block",
+    "uses `import: false`, so no fallback copy is bundled. Import only the",
+    "package ROOTS (e.g. '@mui/material', never '@mui/material/Box'), or a",
+    "second copy gets bundled and the no-shared-payload gate fails the build.",
+    "@mui/icons-material is banned outright."
+  ],
+  "peerDependencies": {
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@mui/material": "^5.18.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "//devDependencies": [
+    "@cytoscape-web/api-types is a file: link to the sibling cytoscape-web",
+    "checkout because the search-bar slot types (RegisterNetworkSearchProviderOptions",
+    "etc.) are not in the published 1.0.0-beta.3 — run `npm run build:api-types`",
+    "in cytoscape-web (Node 24) before installing/typechecking here."
+  ],
+  "devDependencies": {
+    "@cytoscape-web/api-types": "file:../cytoscape-web/packages/api-types",
+    "@cytoscape-web/app-runtime": "^0.1.0",
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@module-federation/vite": "1.16.8",
+    "@mui/material": "^5.18.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "typescript": "^5.7.3",
+    "vite": "8.0.13"
+  }
+}

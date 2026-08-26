@@ -1,0 +1,22 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "psicquic-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5557
+    },
+    {
+      "name": "cytoscape-web-host",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev",
+        "--prefix",
+        "/Users/christian/Documents/GitHub/cytoscape-web"
+      ],
+      "port": 5500
+    }
+  ]
+}
