@@ -16,7 +16,6 @@ import {
   Button,
   Checkbox,
   CircularProgress,
-  Divider,
   FormControlLabel,
   Link,
   Stack,
@@ -34,21 +33,8 @@ import {
   setMaxInteractionsPerSource,
   setSourceExcluded,
   subscribe,
-  SourceSearchOutcome,
 } from '../store/searchStore'
 
-const outcomeLabel = (outcome: SourceSearchOutcome): string => {
-  switch (outcome.status) {
-    case 'pending':
-      return 'searching…'
-    case 'imported':
-      return `${outcome.count} found, ${outcome.importedEdges} imported`
-    case 'empty':
-      return 'no interactions'
-    case 'error':
-      return outcome.message ?? 'failed'
-  }
-}
 
 export const SearchOptionsPanel = (
   _props: NetworkSearchOptionsHostProps,
@@ -93,11 +79,11 @@ export const SearchOptionsPanel = (
 
       {state.registryStatus === 'loading' && (
         <Stack
-          direction="row"
+          direction="column"
           spacing={1}
-          sx={{ alignItems: 'center', py: 1 }}
+          sx={{ alignItems: 'center', pt: 5, pb: 7, justifyContent: 'center' }}
         >
-          <CircularProgress size={16} />
+          <CircularProgress size={32} />
           <Typography variant="body2">
             Loading the PSICQUIC registry…
           </Typography>
@@ -110,7 +96,16 @@ export const SearchOptionsPanel = (
       )}
 
       {state.registryStatus === 'ready' && (
-        <Box sx={{ maxHeight: 220, overflowY: 'auto', pr: 1 }}>
+      <>
+        <Box
+          sx={{
+            maxHeight: 220,
+            overflowY: 'auto',
+            px: 1,
+            border: (theme) => `1px solid ${theme.palette.divider}`,
+            borderRadius: 1,
+          }}
+        >
           {activeServices.map((service) => (
             <Box key={service.name} sx={{ display: 'block' }}>
               <FormControlLabel
@@ -121,6 +116,7 @@ export const SearchOptionsPanel = (
                     onChange={(event) =>
                       setSourceExcluded(service.name, !event.target.checked)
                     }
+                    sx={{ py: 0 }} 
                   />
                 }
                 label={
@@ -139,15 +135,14 @@ export const SearchOptionsPanel = (
               />
             </Box>
           ))}
-          {inactiveCount > 0 && (
-            <Typography variant="caption" color="text.secondary">
-              {inactiveCount} inactive service(s) hidden
-            </Typography>
-          )}
         </Box>
+        {inactiveCount > 0 && (
+          <Typography variant="caption" color="text.secondary" sx={{ textAlign: 'right', display: 'block' }}>
+            {inactiveCount} inactive service(s) hidden
+          </Typography>
+        )}
+        </>
       )}
-
-      <Divider sx={{ my: 1 }} />
 
       <Tooltip title="Cap the number of interactions fetched from each database. 0 fetches everything (the desktop client's behavior).">
         <TextField
@@ -160,36 +155,10 @@ export const SearchOptionsPanel = (
             setMaxInteractionsPerSource(Number(event.target.value))
           }
           inputProps={{ min: 0, step: 100 }}
+          sx={{ my: 2}}
         />
       </Tooltip>
 
-      {state.lastSearch !== undefined && (
-        <>
-          <Divider sx={{ my: 1 }} />
-          <Typography variant="subtitle2">
-            Last search: “{state.lastSearch.query}”
-            {state.lastSearch.running && ' (running…)'}
-          </Typography>
-          <Box sx={{ maxHeight: 160, overflowY: 'auto' }}>
-            {state.lastSearch.outcomes.map((outcome) => (
-              <Typography key={outcome.serviceName} variant="body2" noWrap>
-                {outcome.serviceName}:{' '}
-                <Typography
-                  component="span"
-                  variant="body2"
-                  color={
-                    outcome.status === 'error' ? 'error' : 'text.secondary'
-                  }
-                >
-                  {outcomeLabel(outcome)}
-                </Typography>
-              </Typography>
-            ))}
-          </Box>
-        </>
-      )}
-
-      <Divider sx={{ my: 1 }} />
       <Typography variant="caption" color="text.secondary">
         Queries run against{' '}
         <Link
@@ -199,8 +168,7 @@ export const SearchOptionsPanel = (
         >
           PSICQUIC
         </Link>{' '}
-        services as gene/protein ID searches; one network is imported per
-        database with hits.
+        services as gene/protein ID searches.
       </Typography>
     </Box>
   )
