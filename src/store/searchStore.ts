@@ -14,12 +14,23 @@ import { fetchRegistry, PsicquicService } from '../model/registry'
 
 export interface SourceSearchOutcome {
   serviceName: string
-  status: 'pending' | 'imported' | 'empty' | 'error'
+  /**
+   * 'pending' → count query in flight; 'found' → has hits, awaiting the
+   * user's Select Databases decision; 'importing'/'imported' → chosen in
+   * the dialog; 'empty' → zero hits; 'error' → count or import failed.
+   */
+  status: 'pending' | 'found' | 'importing' | 'imported' | 'empty' | 'error'
   /** Interactions the service reported for the query (format=count). */
   count?: number
   /** Edges actually imported (may be lower when capped). */
   importedEdges?: number
   message?: string
+}
+
+/** One row of the "Select Databases" dialog: a source with hits. */
+export interface ImportCandidate {
+  service: PsicquicService
+  count: number
 }
 
 export interface SearchState {
@@ -34,6 +45,19 @@ export interface SearchState {
     query: string
     running: boolean
     outcomes: SourceSearchOutcome[]
+  }
+  /**
+   * Set between the count phase and the user's import decision; non-undefined
+   * means the "Select Databases" dialog is open. Mirrors the desktop client's
+   * modal in PSICQUICSearchFactory.allFinished(), except sources with zero
+   * records are not listed. Nothing is selected initially — the user must
+   * pick sources, and Import stays disabled until they do.
+   */
+  pendingImport?: {
+    query: string
+    candidates: ImportCandidate[]
+    /** Selected service names. */
+    selected: ReadonlySet<string>
   }
 }
 
@@ -156,4 +180,56 @@ export const finishSearch = (): void => {
     return
   }
   setState({ lastSearch: { ...lastSearch, running: false } })
+}
+
+// ── Select Databases dialog ─────────────────────────────────────
+
+export const openImportDialog = (
+  query: string,
+  candidates: ImportCandidate[],
+): void =>
+  setState({
+    pendingImport: {
+      query,
+      // The desktop dialog sorts by hit count (SourceStatusPanel.sort()).
+      candidates: [...candidates].sort((a, b) => b.count - a.count),
+      selected: new Set(),
+    },
+  })
+
+export const toggleImportSelection = (serviceName: string): void => {
+  const pending = state.pendingImport
+  if (pending === undefined) {
+    return
+  }
+  const selected = new Set(pending.selected)
+  if (selected.has(serviceName)) {
+    selected.delete(serviceName)
+  } else {
+    selected.add(serviceName)
+  }
+  setState({ pendingImport: { ...pending, selected } })
+}
+
+export const setAllImportSelected = (selectAll: boolean): void => {
+  const pending = state.pendingImport
+  if (pending === undefined) {
+    return
+  }
+  setState({
+    pendingImport: {
+      ...pending,
+      selected: selectAll
+        ? new Set(pending.candidates.map((c) => c.service.name))
+        : new Set(),
+    },
+  })
+}
+
+/** Closes the dialog and returns what was pending (Cancel and Import both
+ * close it immediately, as the desktop dialog disposes before importing). */
+export const takePendingImport = (): SearchState['pendingImport'] => {
+  const pending = state.pendingImport
+  setState({ pendingImport: undefined })
+  return pending
 }

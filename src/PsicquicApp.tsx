@@ -22,6 +22,7 @@ import { description, displayName, id, version } from 'virtual:cyweb-app-meta'
 
 import { clearAppContext, setAppContext } from './appContext'
 import { PSICQUIC_LOGO_DATA_URI } from './assets/psicquicLogo'
+import { mountDialogHost, unmountDialogHost } from './dialogHost'
 import { runPsicquicSearch } from './search/runPsicquicSearch'
 
 export const PsicquicApp: CyAppWithLifecycle = {
@@ -52,11 +53,15 @@ export const PsicquicApp: CyAppWithLifecycle = {
 
   mount(context: AppContext): void {
     setAppContext(context)
+    // The Select Databases modal needs a render surface that outlives the
+    // options popover — a small app-owned React root on document.body.
+    mountDialogHost()
   },
 
   unmount(): void {
-    // Resources are auto-cleaned by the host on deactivation; only the
-    // parked context needs dropping.
+    // Resources are auto-cleaned by the host on deactivation; the dialog
+    // root and the parked context are ours to drop.
+    unmountDialogHost()
     clearAppContext()
   },
 }

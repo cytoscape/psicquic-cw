@@ -8,25 +8,34 @@ the network-search feature of the Cytoscape Desktop
 
 - Registers a **PSICQUIC** provider in the host's network search bar
   (name, description, website and 32px icon).
-- The **More Options** popover replaces the desktop client's
-  "Select Databases" dialog (`SourceStatusPanel`): it lists the services from
-  the EBI PSICQUIC registry, lets you exclude sources and cap the per-source
-  result size, and shows the per-source outcome of the last search. Because
-  the host pipeline has no post-count dialog step, source selection happens
-  *before* the search instead of after it.
+- The **More Options** popover lists the services from the EBI PSICQUIC
+  registry, lets you exclude sources from the search and cap the per-source
+  result size, and shows the per-source outcome of the last search.
 - On submit, the query is run as the desktop factory always ran it —
   `SearchMode.INTERACTOR` (gene/protein ID list) against every selected
-  active service:
-  1. `{restUrl}interactor/{query}?format=count` per service;
-  2. for services with hits, `{restUrl}interactor/{query}?format=tab27`
-     (falling back to the server-default MITAB 2.5, like the desktop client);
-  3. the MITAB is parsed with a port of `CyNetworkBuilder` /
-     `InteractionClusterMapper` (same attribute names: `Human Readable
-     Label`, `Taxonomy ID`, `Detection Method`, `Confidence-Score-*`, …);
-  4. **one network per source** is imported via
-     `apis.network.createNetworkFromCx2`, then laid out via
-     `apis.layout.applyLayout` (skipped over 3000 elements, mirroring the
-     desktop `viewThreshold` for view creation).
+  active service — in the desktop client's two phases:
+  1. **Count**: `{restUrl}interactor/{query}?format=count` per service, then
+     the **Select Databases** modal opens (the port of the dialog
+     `PSICQUICSearchFactory.allFinished()` builds around
+     `SourceStatusPanel`), listing only sources with hits. Nothing is
+     imported until the user checks one or more sources; Import stays
+     disabled while nothing is selected.
+  2. **Import** (per selected source):
+     `{restUrl}interactor/{query}?format=tab27` (falling back to the
+     server-default MITAB 2.5, like the desktop client); the MITAB is
+     parsed with a port of `CyNetworkBuilder` / `InteractionClusterMapper`
+     (same attribute names: `Human Readable Label`, `Taxonomy ID`,
+     `Detection Method`, `Confidence-Score-*`, …); **one network per
+     source** is imported via `apis.network.createNetworkFromCx2`, then
+     laid out via `apis.layout.applyLayout` (skipped over 3000 elements,
+     mirroring the desktop `viewThreshold` for view creation). No "Import
+     Finished" dialog is shown afterwards.
+
+The Select Databases modal renders in a small app-owned React root attached
+to `document.body` (see `src/dialogHost.tsx`) — the search-bar slot gives an
+app no persistent surface, and the options popover unmounts whenever it
+closes. "Automatic Network Merge" is not ported (its `InteractionCluster`
+clustering has no Cytoscape Web equivalent).
 
 ## Prerequisites
 
