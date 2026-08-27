@@ -21,9 +21,10 @@ import { AppContext, CyAppWithLifecycle } from 'cyweb/ApiTypes'
 import { description, displayName, id, version } from 'virtual:cyweb-app-meta'
 
 import { clearAppContext, setAppContext } from './appContext'
-import { PSICQUIC_LOGO_DATA_URI } from './assets/psicquicLogo'
 import { mountDialogHost, unmountDialogHost } from './dialogHost'
 import { runPsicquicSearch } from './search/runPsicquicSearch'
+import psicquicLogo from './assets/psicquic-logo.svg'
+
 
 export const PsicquicApp: CyAppWithLifecycle = {
   id, // the Module Federation container name, from `cyweb.id` in package.json
@@ -40,7 +41,7 @@ export const PsicquicApp: CyAppWithLifecycle = {
       name: 'PSICQUIC',
       description: 'Search PSICQUIC-compliant databases.',
       website: 'http://psicquic.github.io/',
-      icon: PSICQUIC_LOGO_DATA_URI,
+      icon: psicquicLogo,
       placeholder: 'Enter gene/protein IDs (e.g. brca2)...',
       optionsComponent: lazy(() => import('./components/SearchOptionsPanel')),
       // onSubmit reaches the App API through the module-level context set

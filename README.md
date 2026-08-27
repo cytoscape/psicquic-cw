@@ -34,8 +34,13 @@ the network-search feature of the Cytoscape Desktop
 The Select Databases modal renders in a small app-owned React root attached
 to `document.body` (see `src/dialogHost.tsx`) — the search-bar slot gives an
 app no persistent surface, and the options popover unmounts whenever it
-closes. "Automatic Network Merge" is not ported (its `InteractionCluster`
-clustering has no Cytoscape Web equivalent).
+closes. That root brings its own copy of the host's MUI theme
+(`src/theme.ts`, under a unique CSS-variable prefix) and follows the host's
+light/dark toggle via the shared `data-mui-color-scheme` attribute. The
+dialog is dismissed by Cancel or the Escape key (both discard the pending
+search results); backdrop clicks are inert. "Automatic Network Merge" is not
+ported (its `InteractionCluster` clustering has no Cytoscape Web
+equivalent).
 
 ## Prerequisites
 

@@ -55,7 +55,13 @@ export const SelectDatabasesDialog = (): JSX.Element | null => {
       open
       maxWidth="md"
       fullWidth
-      disableEscapeKeyDown
+      // Escape cancels (same as the Cancel button); backdrop clicks stay
+      // inert so a stray click doesn't discard the search results.
+      onClose={(_event, reason) => {
+        if (reason === 'escapeKeyDown') {
+          takePendingImport()
+        }
+      }}
       data-testid="psicquic-select-databases-dialog"
     >
       <DialogTitle>Select Databases</DialogTitle>
@@ -74,8 +80,8 @@ export const SelectDatabasesDialog = (): JSX.Element | null => {
                 CSS-variables theme the palette object holds the light-scheme
                 literals, while token strings resolve through theme.vars and
                 so follow the host's dark-mode toggle. */}
-            <TableHead sx={{ backgroundColor: 'background.default' }}>
-              <TableRow>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: 'background.default' }}>
                 <TableCell padding="checkbox" sx={{ backgroundColor: 'inherit' }}>
                   Import
                 </TableCell>
