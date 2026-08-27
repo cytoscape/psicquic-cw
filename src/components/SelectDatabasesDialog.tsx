@@ -25,6 +25,10 @@ import {
   TableCell,
   TableContainer,
   TableHead,
+  // The root specifier, NOT '@mui/material/TableCell': subpath imports
+  // bypass the Module Federation share of '@mui/material' and bundle a
+  // second copy, which fails the SDK's no-shared-payload build gate.
+  tableCellClasses,
   TableRow,
   Typography,
 } from '@mui/material'
@@ -57,8 +61,20 @@ export const SelectDatabasesDialog = (): JSX.Element | null => {
       <DialogTitle>Select Databases</DialogTitle>
       <DialogContent>
         <TableContainer sx={{ maxHeight: 360 }}>
-          <Table size="small" stickyHeader>
-            <TableHead sx={{ backgroundColor: (theme) => theme.palette.background.default }}>
+          <Table
+            size="small"
+            stickyHeader
+            sx={{
+              [`& .${tableCellClasses.root}`]: {
+                border: 'none',
+              },
+            }}
+          >
+            {/* Token string, not theme.palette.background.default: with a
+                CSS-variables theme the palette object holds the light-scheme
+                literals, while token strings resolve through theme.vars and
+                so follow the host's dark-mode toggle. */}
+            <TableHead sx={{ backgroundColor: 'background.default' }}>
               <TableRow>
                 <TableCell padding="checkbox" sx={{ backgroundColor: 'inherit' }}>
                   Import
@@ -74,7 +90,13 @@ export const SelectDatabasesDialog = (): JSX.Element | null => {
                 </TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
+            <TableBody
+              sx={{
+                [`& .${tableCellClasses.root}`]: {
+                  borderBottom: (theme) => `1px solid ${theme.palette.divider}`,
+                },
+              }}
+            >
               {candidates.map(({ service, count }) => (
                 <TableRow
                   key={service.name}
@@ -92,7 +114,7 @@ export const SelectDatabasesDialog = (): JSX.Element | null => {
                   <TableCell>{service.name}</TableCell>
                   <TableCell align="right">{count.toLocaleString()}</TableCell>
                   <TableCell>
-                    <Typography variant="body2" color="text.secondary" noWrap>
+                    <Typography variant="body2" color="text.secondary" fontSize="small">
                       {tagDisplayNames(service.tags).join(', ')}
                     </Typography>
                   </TableCell>

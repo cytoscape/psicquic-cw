@@ -11,9 +11,11 @@
  * one-time deprecation warning for this; the legacy-mode semantics are
  * fine for a single dialog.
  */
+import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material'
 import ReactDOM from 'react-dom'
 
 import { SelectDatabasesDialog } from './components/SelectDatabasesDialog'
+import { psicquicTheme } from './theme'
 
 let container: HTMLDivElement | null = null
 
@@ -24,8 +26,16 @@ export const mountDialogHost = (): void => {
   container = document.createElement('div')
   container.dataset.app = 'psicquic'
   document.body.appendChild(container)
+  // This root sits outside the host's CssVarsProvider (context does not
+  // cross React roots), so it brings its own copy of the host theme —
+  // see theme.ts for why the copy tracks the host's dark mode for free.
   // eslint-disable-next-line react/no-deprecated
-  ReactDOM.render(<SelectDatabasesDialog />, container)
+  ReactDOM.render(
+    <CssVarsProvider theme={psicquicTheme} defaultMode="system">
+      <SelectDatabasesDialog />
+    </CssVarsProvider>,
+    container,
+  )
 }
 
 export const unmountDialogHost = (): void => {
