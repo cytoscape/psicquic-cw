@@ -13,7 +13,7 @@
  * the store's `pendingImport`, set by the search pipeline just before it
  * calls openModal('select-databases').
  */
-import { useEffect, useSyncExternalStore } from 'react'
+import { useSyncExternalStore } from 'react'
 
 import {
   Button,
@@ -51,13 +51,14 @@ export const SelectDatabasesDialog = ({
 }: ModalHostProps): JSX.Element | null => {
   const { pendingImport } = useSyncExternalStore(subscribe, getSnapshot)
 
-  // The host's Close "X" (and app deactivation) unmounts this component
-  // without running any button handler — discard the pending payload then,
-  // or the next search would show this one's rows. On the Cancel and
-  // Import paths the payload is already taken, so this is a no-op.
-  useEffect(() => () => {
-    takePendingImport()
-  }, [])
+  // No unmount cleanup, deliberately. The host's Close "X" (and app
+  // deactivation) closes the dialog without running any button handler,
+  // which leaves pendingImport behind — harmlessly: nothing renders it
+  // while the modal is closed, and the next search overwrites it via
+  // openImportDialog() before reopening. An unmount cleanup that called
+  // takePendingImport() here would misfire under the host's StrictMode
+  // dev double-mount (mount → cleanup → remount) and blank the dialog
+  // the moment it opened.
 
   if (pendingImport === undefined) {
     return null
@@ -155,9 +156,8 @@ export const SelectDatabasesDialog = ({
           disabled={selected.size === 0}
           onClick={() => {
             // importSelectedSources takes the pending payload synchronously
-            // (before its first await), so it must run before requestClose
-            // unmounts this component — the unmount cleanup then finds
-            // nothing left to discard.
+            // (before its first await), so it runs before requestClose
+            // unmounts this component.
             void importSelectedSources()
             requestClose()
           }}
