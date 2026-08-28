@@ -6,16 +6,18 @@
  * no Status column (only searched — hence active — sources can appear),
  * and "Automatic Network Merge" is not ported.
  *
- * Rendered in the app's own React root (see ../dialogHost.tsx), since the
- * search-bar slot gives the app no persistent mount point. Open/closed
- * state is the store's `pendingImport`.
+ * Registered in the host's 'modal-launcher' slot (see PsicquicApp.tsx):
+ * the host owns the Dialog shell — sizing, backdrop/Escape inertness, and
+ * a structural Close "X" wired to the same path as `requestClose` — and
+ * this component renders only the dialog contents. The payload lives in
+ * the store's `pendingImport`, set by the search pipeline just before it
+ * calls openModal('select-databases').
  */
-import { useSyncExternalStore } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 
 import {
   Button,
   Checkbox,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -32,6 +34,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material'
+import { ModalHostProps } from 'cyweb/ApiTypes'
 
 import { tagDisplayNames } from '../model/psimiTags'
 import { importSelectedSources } from '../search/runPsicquicSearch'
@@ -43,27 +46,26 @@ import {
   toggleImportSelection,
 } from '../store/searchStore'
 
-export const SelectDatabasesDialog = (): JSX.Element | null => {
+export const SelectDatabasesDialog = ({
+  requestClose,
+}: ModalHostProps): JSX.Element | null => {
   const { pendingImport } = useSyncExternalStore(subscribe, getSnapshot)
+
+  // The host's Close "X" (and app deactivation) unmounts this component
+  // without running any button handler — discard the pending payload then,
+  // or the next search would show this one's rows. On the Cancel and
+  // Import paths the payload is already taken, so this is a no-op.
+  useEffect(() => () => {
+    takePendingImport()
+  }, [])
+
   if (pendingImport === undefined) {
     return null
   }
   const { candidates, selected } = pendingImport
 
   return (
-    <Dialog
-      open
-      maxWidth="md"
-      fullWidth
-      // Escape cancels (same as the Cancel button); backdrop clicks stay
-      // inert so a stray click doesn't discard the search results.
-      onClose={(_event, reason) => {
-        if (reason === 'escapeKeyDown') {
-          takePendingImport()
-        }
-      }}
-      data-testid="psicquic-select-databases-dialog"
-    >
+    <div data-testid="psicquic-select-databases-dialog">
       <DialogTitle>Select Databases</DialogTitle>
       <DialogContent>
         <TableContainer sx={{ maxHeight: 360 }}>
@@ -139,19 +141,30 @@ export const SelectDatabasesDialog = (): JSX.Element | null => {
             Select None
           </Button>
         </Stack>
-        <Button variant="outlined" onClick={() => takePendingImport()}>
+        <Button
+          variant="outlined"
+          onClick={() => {
+            takePendingImport()
+            requestClose()
+          }}
+        >
           Cancel
         </Button>
         <Button
           variant="contained"
           disabled={selected.size === 0}
           onClick={() => {
+            // importSelectedSources takes the pending payload synchronously
+            // (before its first await), so it must run before requestClose
+            // unmounts this component — the unmount cleanup then finds
+            // nothing left to discard.
             void importSelectedSources()
+            requestClose()
           }}
         >
           Import
         </Button>
       </DialogActions>
-    </Dialog>
+    </div>
   )
 }

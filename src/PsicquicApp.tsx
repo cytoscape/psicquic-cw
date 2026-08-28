@@ -3,12 +3,15 @@
  * webservice-psicquic-client's network search feature (the
  * AbstractNetworkSearchTaskFactory registered by PSICQUICSearchFactory).
  *
- * It registers exactly one resource: a network search provider in the
- * 'search-bar' slot. Metadata (name, description, website, icon) mirrors
- * the desktop factory's constants. The desktop client's other registration
- * (PSICQUICWebServiceClient as an AbstractWebServiceGUIClient /
- * NetworkImportWebServiceClient) has no Cytoscape Web equivalent and is
- * not ported.
+ * It registers two resources: a network search provider in the
+ * 'search-bar' slot, and the "Select Databases" modal in the
+ * 'modal-launcher' slot — opened imperatively from the search pipeline
+ * once the count phase finishes, and rendered by the host inside its own
+ * React tree (host theme, dialog shell, error isolation). Metadata (name,
+ * description, website, icon) mirrors the desktop factory's constants.
+ * The desktop client's other registration (PSICQUICWebServiceClient as an
+ * AbstractWebServiceGUIClient / NetworkImportWebServiceClient) has no
+ * Cytoscape Web equivalent and is not ported.
  *
  * Identity (id, display name, version, description) arrives from
  * `virtual:cyweb-app-meta`, which the build fills in from the `cyweb`
@@ -21,7 +24,6 @@ import { AppContext, CyAppWithLifecycle } from 'cyweb/ApiTypes'
 import { description, displayName, id, version } from 'virtual:cyweb-app-meta'
 
 import { clearAppContext, setAppContext } from './appContext'
-import { mountDialogHost, unmountDialogHost } from './dialogHost'
 import { runPsicquicSearch } from './search/runPsicquicSearch'
 import psicquicLogo from './assets/psicquic-logo.svg'
 
@@ -50,19 +52,28 @@ export const PsicquicApp: CyAppWithLifecycle = {
       // surfaced by the host as an error snackbar.
       onSubmit: ({ query }) => runPsicquicSearch(query),
     },
+    {
+      slot: 'modal-launcher',
+      id: 'select-databases',
+      maxWidth: 'md',
+      fullWidth: true,
+      // The host renders this inside its own dialog shell when the search
+      // pipeline calls openModal('select-databases') after the count phase.
+      component: lazy(() =>
+        import('./components/SelectDatabasesDialog').then((m) => ({
+          default: m.SelectDatabasesDialog,
+        })),
+      ),
+    },
   ],
 
   mount(context: AppContext): void {
     setAppContext(context)
-    // The Select Databases modal needs a render surface that outlives the
-    // options popover — a small app-owned React root on document.body.
-    mountDialogHost()
   },
 
   unmount(): void {
-    // Resources are auto-cleaned by the host on deactivation; the dialog
-    // root and the parked context are ours to drop.
-    unmountDialogHost()
+    // Resources are auto-cleaned by the host on deactivation (open modals
+    // included); the parked context is ours to drop.
     clearAppContext()
   },
 }

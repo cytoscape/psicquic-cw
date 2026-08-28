@@ -80,7 +80,20 @@ export const runPsicquicSearch = async (query: string): Promise<void> => {
         : `No interactions found for "${query}" in ${targets.length} PSICQUIC source(s).`,
     )
   }
+  // Payload first, then open: the dialog content reads pendingImport from
+  // the store the moment the host mounts it.
   openImportDialog(query, candidates)
+  const opened =
+    getAppContext().apis.resource.openModal('select-databases')
+  if (!opened.success) {
+    // The registration is declarative and processed before mount(), so
+    // this should be unreachable; surface it to the host's snackbar
+    // rather than silently dropping the results.
+    takePendingImport()
+    throw new Error(
+      `Could not open the Select Databases dialog: ${opened.error.message}`,
+    )
+  }
 }
 
 /**
