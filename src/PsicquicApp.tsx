@@ -42,7 +42,7 @@ export const PsicquicApp: CyAppWithLifecycle = {
       description: 'Search PSICQUIC-compliant databases.',
       website: 'http://psicquic.github.io/',
       icon: psicquicLogo,
-      placeholder: 'Enter gene/protein IDs (e.g. brca2)...',
+      placeholder: 'Enter gene/protein IDs (e.g. brca2)',
       optionsComponent: lazy(() => import('./components/SearchOptionsPanel')),
       // onSubmit reaches the App API through the module-level context set
       // in mount() — declarative resources carry no injected apis, and
