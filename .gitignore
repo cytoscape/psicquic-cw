@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# App Store archives (built by `npm run build:zip`, never committed)
+*.zip
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

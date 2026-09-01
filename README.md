@@ -44,7 +44,9 @@ equivalent).
 
 ## Prerequisites
 
-- Node 24 (`nvm use 24`)
+- Node 24 — enforced, not just recommended: `.nvmrc` pins it for
+  `nvm use`, `.npmrc` sets `engine-strict` so `npm install` refuses an
+  older Node, and `vite.config.ts` fails any build or dev run below 24.
 - A sibling checkout of `cytoscape-web` on the `feature/network-search-bar`
   branch at `../cytoscape-web` — `@cytoscape-web/api-types` is a `file:` link
   to it because the search-bar types are newer than the published beta.
@@ -68,6 +70,23 @@ provider. Try a query like `brca2`.
 
 `npm run typecheck` type-checks the app and the build config;
 `npm run verify` runs the SDK's bundle checks after `npm run build`.
+
+## Package for the App Store
+
+```bash
+npm run build:zip
+```
+
+writes `psicquic-<version>.zip` next to `package.json` — the file the
+Cytoscape App Store submission page takes. The archive contains the browser
+publish set plus a generated `cy-manifest.json` (derived from this
+`package.json`; never edit or commit one), and the build is verified with
+the same checks as `npm run verify` before it is packaged. A plain
+`npm run build` does not write the zip.
+
+Prefer building the release zip in CI: a workstation build embeds absolute
+build-machine paths in `remoteEntry.js` (harmless dead literals, but they
+disclose your username and directory layout).
 
 ## CORS proxy (dev-server only)
 

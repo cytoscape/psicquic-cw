@@ -1,9 +1,20 @@
 {
   "name": "@cytoscape-web/psicquic",
   "description": "Search PSICQUIC-compliant molecular interaction databases and import the results as networks",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
+  "author": "Cytoscape Consortium",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cytoscape/psicquic-cw.git"
+  },
+  "homepage": "https://github.com/cytoscape/psicquic-cw#readme",
+  "keywords": [
+    "proteomics",
+    "molecular interaction"
+  ],
   "engines": {
     "node": ">=24.0.0"
   },
@@ -19,6 +30,7 @@
   },
   "scripts": {
     "build": "vite build",
+    "build:zip": "cross-env CYWEB_APP_ZIP=1 vite build",
     "dev": "vite",
     "verify": "cyweb-app verify",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json"
@@ -45,11 +57,13 @@
   ],
   "devDependencies": {
     "@cytoscape-web/api-types": "file:../cytoscape-web/packages/api-types",
-    "@cytoscape-web/app-runtime": "^0.1.0",
+    "@cytoscape-web/app-runtime": "0.4.0-next.1",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
     "@module-federation/vite": "1.16.8",
     "@mui/material": "^5.18.0",
+    "adm-zip": "^0.5.10",
+    "cross-env": "^10.1.0",
     "@types/node": "^24.0.0",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
