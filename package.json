@@ -49,25 +49,19 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
-  "//devDependencies": [
-    "@cytoscape-web/api-types is a file: link to the sibling cytoscape-web",
-    "checkout because the search-bar slot types (RegisterNetworkSearchProviderOptions",
-    "etc.) are not in the published 1.0.0-beta.3 — run `npm run build:api-types`",
-    "in cytoscape-web (Node 24) before installing/typechecking here."
-  ],
   "devDependencies": {
-    "@cytoscape-web/api-types": "file:../cytoscape-web/packages/api-types",
+    "@cytoscape-web/api-types": "^1.0.0-beta.4",
     "@cytoscape-web/app-runtime": "0.4.0-next.1",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
     "@module-federation/vite": "1.16.8",
     "@mui/material": "^5.18.0",
-    "adm-zip": "^0.5.10",
-    "cross-env": "^10.1.0",
     "@types/node": "^24.0.0",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^5.0.0",
+    "adm-zip": "^0.5.10",
+    "cross-env": "^10.1.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "typescript": "^5.7.3",
